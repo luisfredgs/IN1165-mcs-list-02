@@ -15,7 +15,7 @@ import argparse
 
 seed = 100000
 np.random.seed(seed)
-
+n_splits = 10
 
 def run(args):
     
@@ -33,12 +33,13 @@ def run(args):
         label_pruning_save = 'pruned'
         print("Classifiers will be pruned...")
     else:
+        print("Training ensemble with no pruning...")
         pruning = False
         label_pruning_save = 'no_pruned'
     
     nb_pru = args.nb_pru
 
-    skf = StratifiedKFold(n_splits=10, random_state=seed, shuffle=True)
+    skf = StratifiedKFold(n_splits=n_splits, random_state=seed, shuffle=True)
     pool_classifiers = BaggingClassifier(base_estimator=base_learner, n_estimators=n_estimators)
     scores = list()
 
@@ -99,27 +100,29 @@ def run(args):
         delayed(train)(train_index, test_index) for train_index, test_index in skf.split(X, Y))
 
 
-    diversity_matrices = [out['diversity'] for out in output]
-    results['accuracy'] = [out['acc'] for out in output]
-    results['f1_score'] = [out['f1'] for out in output]
-    results['g1_score'] = [out['g1'] for out in output]
-    results['roc_auc'] = [out['roc'] for out in output]
-    results['time_to_pruning'] = [out['time_to_pruning'] for out in output]
+    if len(output) == n_splits:
+        print(len(output))
+        diversity_matrices = [out['diversity'] for out in output]
+        results['accuracy'] = [out['acc'] for out in output]
+        results['f1_score'] = [out['f1'] for out in output]
+        results['g1_score'] = [out['g1'] for out in output]
+        results['roc_auc'] = [out['roc'] for out in output]
+        results['time_to_pruning'] = [out['time_to_pruning'] for out in output]
 
-    # Results
-    df_diversity = pd.DataFrame(np.mean(diversity_matrices, axis=0))
-    df_diversity.to_csv("results/%s_diversity_matrix_%s_%s.csv" % (ds_name, hardnesses, label_pruning_save), index=False)
+        # Results
+        df_diversity = pd.DataFrame(np.mean(diversity_matrices, axis=0))
+        df_diversity.to_csv("results/%s_diversity_matrix_%s_%s.csv" % (ds_name, hardnesses, label_pruning_save), index=False)
 
-    with plt.style.context('ggplot'):
-        sns.heatmap(df_diversity.round(2), annot=True, fmt="g", cmap='viridis', xticklabels=True, yticklabels=True, annot_kws={'size':10})
-        plt.savefig("results/%s_diversity_matrix_%s_%s.pdf" % (ds_name, hardnesses, label_pruning_save))
-        #plt.show()
+        with plt.style.context('ggplot'):
+            sns.heatmap(df_diversity.round(2), annot=True, fmt="g", cmap='viridis', xticklabels=True, yticklabels=True, annot_kws={'size':10})
+            plt.savefig("results/%s_diversity_matrix_%s_%s.pdf" % (ds_name, hardnesses, label_pruning_save))
+            #plt.show()
 
 
-    metric_results = pd.DataFrame(results)
-    metric_results.to_csv("results/%s_summary_metrics_%s_%s.csv" % (ds_name, hardnesses, label_pruning_save), index=False)
+        metric_results = pd.DataFrame(results)
+        metric_results.to_csv("results/%s_summary_metrics_%s_%s.csv" % (ds_name, hardnesses, label_pruning_save), index=False)
 
-    print(metric_results.mean())
+        print(metric_results.mean())
 
 if __name__ == '__main__':        
 
@@ -129,7 +132,10 @@ if __name__ == '__main__':
                     default='all_instances', help='Instance hardness of validation set')
 
     parser.add_argument('--pruning', dest='pruning',
-                    default=False, type=bool, help='When pruning must be performed')
+                    action='store_true', help='When pruning must be performed')
+    
+    parser.add_argument('--no-pruning', dest='pruning',
+                    action='store_false', help='When pruning must be performed')
     
     parser.add_argument('--dataset', dest='dataset',
                     default="kc2", help='Dataset')
