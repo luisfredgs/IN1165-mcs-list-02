@@ -40,11 +40,9 @@ results = {'accuracy': [], 'f1_score': [], 'g1_score': [], 'roc_auc':[], 'fold':
 
 # paralellize: https://stackoverflow.com/a/55180582
 #for train_index, test_index in skf.split(X, Y):
-def train(train_index, test_index, fold):
+def train(train_index, test_index):
     X_train, X_test = X[train_index], X[test_index]
     y_train, y_test = Y[train_index], Y[test_index]
-    
-    print("Fold %d" % fold)
 
     # Instance Hardness
     validation_data, validation_labels = get_validation_data(X_train, y_train, 0.5, hardnesses=hardnesses)        
