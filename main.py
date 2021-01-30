@@ -8,20 +8,17 @@ from sklearn.metrics import roc_auc_score
 import seaborn as sns
 import numpy as np
 import time
-
 from utils import *
 from pruning import *
 from datasets import *
-
-pruning = False
-hardnesses = 'all_instances' # easy, all_instances
-n_estimators = 10
-
-base_learner = Perceptron(max_iter=100)
 seed = 100000
 np.random.seed(seed)
 
-ds_name, X, Y = dataset_pc1()
+hardnesses = 'all_instances' # easy, all_instances
+pruning = False
+n_estimators = 100
+base_learner = Perceptron(max_iter=100)
+ds_name, X, Y = dataset_kc2()
 
 if pruning == True:
     label_pruning_save = 'pruned'
