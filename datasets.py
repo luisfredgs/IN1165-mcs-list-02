@@ -10,7 +10,7 @@ def dataset_kc2():
     """
     data = arff.loadarff("data/kc2.arff")
     df = pd.DataFrame(data[0])
-    print(df.info())
+    #print(df.info())
 
     le = preprocessing.LabelEncoder()
     le.fit(df['problems'])
@@ -27,7 +27,7 @@ def dataset_pc1():
 
     data = arff.loadarff("data/pc1.arff")
     df = pd.DataFrame(data[0])
-    print(df.info())
+    #print(df.info())
 
     le = preprocessing.LabelEncoder()
     le.fit(df['defects'])
