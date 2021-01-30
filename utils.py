@@ -1,3 +1,4 @@
+from math import sqrt
 from deslib.util.instance_hardness import kdn_score
 from deslib.util.diversity import double_fault
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, precision_score, recall_score

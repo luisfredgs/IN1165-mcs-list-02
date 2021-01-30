@@ -1,3 +1,4 @@
+from joblib import Parallel, delayed
 import matplotlib.pyplot as plt
 from sklearn.ensemble import BaggingClassifier
 from sklearn.linear_model import Perceptron
@@ -28,17 +29,18 @@ else:
     label_pruning_save = 'no_pruned'
 
 
+skf = StratifiedKFold(n_splits=10, random_state=seed, shuffle=True)
+pool_classifiers = BaggingClassifier(base_estimator=base_learner, n_estimators=n_estimators)
+scores = list()
+
 diversity_matrices = []
 results = list()
 results = {'accuracy': [], 'f1_score': [], 'g1_score': [], 'roc_auc':[], 'fold': [], 'time_to_pruning': []}
 
 
-kf = StratifiedKFold(n_splits=10, random_state=seed, shuffle=True)
-pool_classifiers = BaggingClassifier(base_estimator=base_learner, n_estimators=n_estimators)
-scores = list()
-
-fold = 0
-for train_index, test_index in kf.split(X, Y):
+# paralellize: https://stackoverflow.com/a/55180582
+#for train_index, test_index in skf.split(X, Y):
+def train(train_index, test_index, fold):
     X_train, X_test = X[train_index], X[test_index]
     y_train, y_test = Y[train_index], Y[test_index]
     
@@ -84,17 +86,26 @@ for train_index, test_index in kf.split(X, Y):
     f1 = get_f1_score(y_test, maj_votes)
     roc = roc_auc_score(y_test, maj_votes, average='macro')
 
-    diversity_matrices.append(diversity)
-    results['accuracy'].append(acc)
-    results['f1_score'].append(f1)
-    results['g1_score'].append(g1)
-    results['roc_auc'].append(roc)
-    results['time_to_pruning'].append(Tc)
-    results['fold'].append(fold)
-    fold += 1
+    return dict(f1=f1, g1=g1, 
+            acc=acc,
+            roc=roc, 
+            diversity=diversity,
+            time_to_pruning=Tc,
+            fold=fold)    
+
+output = Parallel(n_jobs=-1, verbose=100, pre_dispatch='1.5*n_jobs')(
+    delayed(train)(train_index, test_index) for train_index, test_index in skf.split(X, Y))
+
+
+diversity_matrices = [out['diversity'] for out in output]
+results['accuracy'] = [out['acc'] for out in output]
+results['f1_score'] = [out['f1'] for out in output]
+results['g1_score'] = [out['g1'] for out in output]
+results['roc_auc'] = [out['roc'] for out in output]
+results['time_to_pruning'] = [out['time_to_pruning'] for out in output]
+results['fold'] = [out['fold'] for out in output]
 
 # Results
-
 df_diversity = pd.DataFrame(np.mean(diversity_matrices, axis=0))
 df_diversity.to_csv("results/%s_diversity_matrix_%s_%s.csv" % (ds_name, hardnesses, label_pruning_save), index=False)
 
