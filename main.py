@@ -14,7 +14,7 @@ from pruning import *
 from datasets import *
 
 pruning = False
-hardnesses = 'hard' # easy, None
+hardnesses = 'all_instances' # easy, all_instances
 n_estimators = 10
 
 base_learner = Perceptron(max_iter=100)
@@ -34,12 +34,8 @@ pool_classifiers = BaggingClassifier(base_estimator=base_learner, n_estimators=n
 scores = list()
 
 diversity_matrices = []
-results = list()
-results = {'accuracy': [], 'f1_score': [], 'g1_score': [], 'roc_auc':[], 'fold': [], 'time_to_pruning': []}
+results = {'accuracy': [], 'f1_score': [], 'g1_score': [], 'roc_auc':[], 'time_to_pruning': []}
 
-
-# paralellize: https://stackoverflow.com/a/55180582
-#for train_index, test_index in skf.split(X, Y):
 def train(train_index, test_index):
     X_train, X_test = X[train_index], X[test_index]
     y_train, y_test = Y[train_index], Y[test_index]
@@ -60,7 +56,7 @@ def train(train_index, test_index):
     nb_pru = 5
     m = 4
     rho = nb_pru / n_estimators
-    
+    Tc = 0.0
     if pruning == True:
         # we must now run pruning using the method 'Centralized Objection Maximization for Ensemble Pruning (COMEP)'
         since = time.time()
@@ -88,8 +84,7 @@ def train(train_index, test_index):
             acc=acc,
             roc=roc, 
             diversity=diversity,
-            time_to_pruning=Tc,
-            fold=fold)    
+            time_to_pruning=Tc)    
 
 output = Parallel(n_jobs=-1, verbose=100, pre_dispatch='1.5*n_jobs')(
     delayed(train)(train_index, test_index) for train_index, test_index in skf.split(X, Y))
@@ -101,7 +96,6 @@ results['f1_score'] = [out['f1'] for out in output]
 results['g1_score'] = [out['g1'] for out in output]
 results['roc_auc'] = [out['roc'] for out in output]
 results['time_to_pruning'] = [out['time_to_pruning'] for out in output]
-results['fold'] = [out['fold'] for out in output]
 
 # Results
 df_diversity = pd.DataFrame(np.mean(diversity_matrices, axis=0))
@@ -110,7 +104,7 @@ df_diversity.to_csv("results/%s_diversity_matrix_%s_%s.csv" % (ds_name, hardness
 with plt.style.context('ggplot'):
     sns.heatmap(df_diversity.round(2), annot=True, fmt="g", cmap='viridis', xticklabels=True, yticklabels=True, annot_kws={'size':10})
     plt.savefig("results/%s_diversity_matrix_%s_%s.pdf" % (ds_name, hardnesses, label_pruning_save))
-    plt.show()
+    #plt.show()
 
 
 metric_results = pd.DataFrame(results)
