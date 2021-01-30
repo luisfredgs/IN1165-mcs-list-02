@@ -56,7 +56,8 @@ def run(args):
         if pruning == True:
             
             # Pruning classifiers    
-            
+            print("Pruning classifiers using COMEP...")
+
             validation_data, validation_labels = get_validation_data(X_train, y_train, 0.5, hardnesses=hardnesses)        
             y_insp = [i.predict(validation_data).tolist() for i in pool_classifiers.estimators_]
             lam = 0.5
@@ -128,7 +129,7 @@ if __name__ == '__main__':
                     default='all_instances', help='Instance hardness of validation set')
 
     parser.add_argument('--pruning', dest='pruning',
-                    default=False, help='When pruning must be performed')
+                    default=False, type=bool, help='When pruning must be performed')
     
     parser.add_argument('--dataset', dest='dataset',
                     default="kc2", help='Dataset')
