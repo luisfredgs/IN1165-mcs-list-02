@@ -40,7 +40,7 @@ def run(args):
     nb_pru = args.nb_pru
 
     skf = StratifiedKFold(n_splits=n_splits, random_state=seed, shuffle=True)
-    pool_classifiers = BaggingClassifier(base_estimator=base_learner, n_estimators=n_estimators)
+    pool_classifiers = BaggingClassifier(base_estimator=base_learner, n_estimators=n_estimators, random_state=seed)
     scores = list()
 
     diversity_matrices = []
@@ -120,9 +120,12 @@ def run(args):
 
 
         metric_results = pd.DataFrame(results)
-        metric_results.to_csv("results/%s_summary_metrics_%s_%s.csv" % (ds_name, hardnesses, label_pruning_save), index=False)
+        metric_results.to_csv("results/%s_summary_metrics_all_folds_%s_%s.csv" % (ds_name, hardnesses, label_pruning_save), index=False)
 
         print(metric_results.mean())
+        metric_results_average = open("results/%s_summary_metrics_average_folds_%s_%s.txt" % (ds_name, hardnesses, label_pruning_save), "w")
+        metric_results_average.write(metric_results.mean())
+        metric_results_average.close()
 
 if __name__ == '__main__':        
 
@@ -141,10 +144,10 @@ if __name__ == '__main__':
                     default="kc2", help='Dataset')
     
     parser.add_argument('--n_estimators', dest='n_estimators',
-                    default=100, type=int, help='INumber of base classifiers')
+                    default=100, type=int, help='Number of base classifiers')
 
     parser.add_argument('--nb_pru', dest='nb_pru',
-                    default=5, type=int, help='Number of classifiers in final ensemble')
+                    default=5, type=int, help='The size of the pruned sub-ensemble')
     
     args = parser.parse_args()
 

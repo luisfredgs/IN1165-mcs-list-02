@@ -15,11 +15,6 @@ GAP_NAN = 1e-16
 def check_zero(temp):
     return temp if temp != 0. else CONST_ZERO
 
-
-
-# ----------  Probability of Discrete Variable  -----------
-
-
 # probability of one vector
 #
 def prob(X):
@@ -119,9 +114,6 @@ def I(X, Y):
     del px,py,pxy, i,j
     gc.collect()
     return ans
-
-
-
 
 # MI(X, Y): The normalized mutual information of two discrete random variables X and Y
 #
