@@ -1,6 +1,16 @@
 import numpy as np
 from copy import deepcopy
 import gc
+
+"""
+This code comes from the paper "Ensemble Pruning based on Objection Maximization with a General Distributed 
+Framework".
+
+The pruning algorithm we used is Centralized Objection Maximization for Ensemble Pruning - COMEP, 
+which is a centralized method for ensemble pruning. COMEP selects greedily the current optimal classifier 
+at each step of the algorithm. For more details, refer to: https://arxiv.org/pdf/1806.04899.pdf
+"""
+
 gc.enable()
 
 DTY_FLT = 'float32'
