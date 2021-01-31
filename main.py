@@ -123,9 +123,8 @@ def run(args):
         metric_results.to_csv("results/%s_summary_metrics_all_folds_%s_%s.csv" % (ds_name, hardnesses, label_pruning_save), index=False)
 
         print(metric_results.mean())
-        metric_results_average = open("results/%s_summary_metrics_average_folds_%s_%s.txt" % (ds_name, hardnesses, label_pruning_save), "w")
-        metric_results_average.write(metric_results.mean())
-        metric_results_average.close()
+        metric_results.mean().to_csv("results/%s_summary_metrics_average_folds_%s_%s.csv" % (ds_name, hardnesses, label_pruning_save))
+        
 
 if __name__ == '__main__':        
 
