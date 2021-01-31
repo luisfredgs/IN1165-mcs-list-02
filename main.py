@@ -146,7 +146,7 @@ if __name__ == '__main__':
                     default=100, type=int, help='Number of base classifiers')
 
     parser.add_argument('--nb_pru', dest='nb_pru',
-                    default=5, type=int, help='The size of the pruned sub-ensemble')
+                    default=10, type=int, help='The size of the pruned sub-ensemble')
     
     args = parser.parse_args()
 
