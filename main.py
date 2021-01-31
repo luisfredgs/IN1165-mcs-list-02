@@ -99,6 +99,12 @@ def run(args):
     output = Parallel(n_jobs=-1, verbose=100, pre_dispatch='1.5*n_jobs')(
         delayed(train)(train_index, test_index) for train_index, test_index in skf.split(X, Y))
 
+    def plot_diversity(df, save_to, annot=True):
+        f, ax = plt.subplots(figsize=(12, 9))
+        mask = np.triu(np.ones_like(df, dtype=bool))
+        sns.heatmap(df, vmax=1.0, fmt='g', square=True, annot=annot, linewidths=.0, 
+                    cbar_kws={"shrink": .5}, robust=True, mask=mask)
+        plt.savefig(save_to)
 
     if len(output) == n_splits:
         print(len(output))
@@ -113,11 +119,8 @@ def run(args):
         df_diversity = pd.DataFrame(np.mean(diversity_matrices, axis=0))
         df_diversity.to_csv("results/%s_diversity_matrix_%s_%s.csv" % (ds_name, hardnesses, label_pruning_save), index=False)
 
-        with plt.style.context('ggplot'):
-            sns.heatmap(df_diversity.round(2), annot=True, fmt="g", cmap='viridis', xticklabels=True, yticklabels=True, annot_kws={'size':10})
-            plt.savefig("results/%s_diversity_matrix_%s_%s.pdf" % (ds_name, hardnesses, label_pruning_save))
-            #plt.show()
-
+        
+        #plot_diversity(df_diversity.round(2), "results/%s_diversity_matrix_%s_%s.pdf" % (ds_name, hardnesses, label_pruning_save))
 
         metric_results = pd.DataFrame(results)
         metric_results.to_csv("results/%s_summary_metrics_all_folds_%s_%s.csv" % (ds_name, hardnesses, label_pruning_save), index=False)
