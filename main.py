@@ -102,8 +102,10 @@ def run(args):
     def plot_diversity(df, save_to, annot=True):
         f, ax = plt.subplots(figsize=(12, 9))
         mask = np.triu(np.ones_like(df, dtype=bool))
-        sns.heatmap(df, vmax=1.0, fmt='g', square=True, annot=annot, linewidths=.0, 
-                    cbar_kws={"shrink": .5}, robust=True, mask=mask)
+        cmap = sns.cm.rocket_r
+        sns.heatmap(df, fmt='g', square=True, annot=annot, linewidths=.0, cmap=cmap,
+                    cbar_kws={"shrink": .5}, robust=True, mask=mask,
+                    cbar=False)
         plt.savefig(save_to)
 
     if len(output) == n_splits:
