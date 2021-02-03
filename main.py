@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from sklearn.ensemble import BaggingClassifier
 from sklearn.linear_model import Perceptron
 from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import train_test_split
 from deslib.util.diversity import double_fault
 from sklearn.metrics import roc_auc_score
 import seaborn as sns
@@ -51,15 +52,17 @@ def run(args):
         y_train, y_test = Y[train_index], Y[test_index]        
 
         # train classifiers
+        X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, 
+                                            test_size=0.2, random_state=seed)
         pool_classifiers.fit(X_train, y_train)    
         
         Tc = 0.0
         if pruning == True:
             
             # Pruning classifiers    
-            print("Pruning classifiers using COMEP...")
+            print("Pruning classifiers using COMEP...")            
 
-            validation_data, validation_labels = get_validation_data(X_train, y_train, 0.5, hardnesses=hardnesses)        
+            validation_data, validation_labels = get_validation_data(X_valid, y_valid, 0.5, hardnesses=hardnesses)        
             y_insp = [i.predict(validation_data).tolist() for i in pool_classifiers.estimators_]
             lam = 0.5
             #nb_pru = 5
