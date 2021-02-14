@@ -53,7 +53,7 @@ def run(args):
 
         # train classifiers
         X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, 
-                                            test_size=0.2, random_state=seed)
+                                            test_size=0.3, random_state=seed)
         pool_classifiers.fit(X_train, y_train)    
         
         Tc = 0.0
