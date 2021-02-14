@@ -1,3 +1,5 @@
+# The pruning algorithm is using the method 'Centralized Objection Maximization for Ensemble Pruning (COMEP)'\
+#  of https://arxiv.org/pdf/1806.04899.pdf
 from joblib import Parallel, delayed
 import matplotlib.pyplot as plt
 from sklearn.ensemble import BaggingClassifier
@@ -20,7 +22,7 @@ n_splits = 10
 
 def run(args):
     
-    hardnesses = args.hardnesses # easy, all_instances    
+    hardnesses = args.hardnesses # easy, hard, all_instances    
     n_estimators = args.n_estimators
     base_learner = Perceptron(max_iter=100)
     print("Using %d classifiers." % n_estimators)
@@ -67,10 +69,7 @@ def run(args):
             lam = 0.5
             #nb_pru = 5
             m = 4
-            rho = nb_pru / n_estimators
-            
-            # we must now run pruning using the method 'Centralized Objection Maximization for Ensemble Pruning (COMEP)'\
-            #  of https://arxiv.org/pdf/1806.04899.pdf
+            rho = nb_pru / n_estimators           
 
             since = time.time()
             Pc = COMEP_Pruning(np.array(y_insp).T.tolist(), nb_pru, validation_labels, lam)
